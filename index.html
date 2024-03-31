@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adivinanzas</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url('https://w0.peakpx.com/wallpaper/236/198/HD-wallpaper-pastel-unicorn-background-fondo-de-pantalla-macbook-fondo-de-pantalla-mac-fondo-de-pantalla-laptop-cute-watercolor.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+        .container {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #d3a9ff; /* Púrpura medio */
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .div1, .div2, .div3, .div4 {
+            width: 100%; /* Ancho del 50% */
+            height: 100%;
+            background-color: #e6ccff; /* Púrpura claro */
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            padding: 10px; /* Añadimos un poco de espacio interior */
+            box-sizing: border-box; /* Incluimos el padding en el ancho total */
+            word-wrap: break-word; /* Permite que el texto se ajuste al tamaño del contenedor */
+            border-radius: 5px;
+        }
+        #restart-button-container {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center; /* Centra horizontalmente */
+            align-items: center; /* Centra verticalmente */
+        }
+        .row {
+            display: flex;
+            justify-content: center;
+        }
+        .cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #7f00ff; /* Púrpura oscuro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 2px;
+            background-color: #b48eff; /* Rosa */
+            border-radius: 5px;
+        }
+        .correct {
+            background-color: #b3ffb3; /* Verde claro */
+        }
+        .present {
+            background-color: #b3e0ff; /* Azul claro */
+        }
+        #restart-button {
+            padding: 10px 20px;
+            background-color: #e6ccff; /* Púrpura oscuro */
+            color: #000000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="div1">Para Dani, Dayis es:</div>
+        <div class="div2" id="game-container">
+            <div id="grid"></div>
+        </div>
+        <div class="div3" id="message"></div>
+        <div class="div4" id="restart-button-container">
+            <button id="restart-button" onclick="restartGame()">Jugar otra vez</button>
+        </div>
+    </div>
+
+    <script>
+        const words = ["linda", "bella", "guapa", "tierna", "dulce", "bonita", "hermosa"];
+        let currentWord = words[Math.floor(Math.random() * words.length)];
+        let currentRow = 0;
+        let currentColumn = 0;
+        let intentos = 0;
+
+        const grid = document.getElementById("grid");
+        const message = document.getElementById("message");
+        const instructions = document.getElementById("instructions");
+
+        // Crea el tablero
+        for (let i = 0; i < currentWord.length-1; i++) {
+            const row = document.createElement("div");
+            row.classList.add("row");
+            for (let j = 0; j < currentWord.length; j++) {
+                const cell = document.createElement("div");
+                cell.classList.add("cell");
+                row.appendChild(cell);
+            }
+            grid.appendChild(row);
+        }
+
+        // Función para manejar la escritura
+        document.addEventListener("keydown", onKeyDown);
+
+        function onKeyDown(event) {
+            const key = event.key;
+            const regex = /[a-záéíóúñ]/;
+
+            if (regex.test(key) && currentColumn < currentWord.length) {
+                // Permitir letras
+                const cell = grid.children[currentRow].children[currentColumn];
+                cell.textContent = key;
+                currentColumn++;
+            } else if (key === "Backspace" && currentColumn > 0) {
+                // Permitir retroceso
+                currentColumn--;
+                const cell = grid.children[currentRow].children[currentColumn];
+                cell.textContent = "";
+            } else if (key === "Enter" && currentColumn === currentWord.length) {
+                // Evitar captura de Enter y verificar palabra
+                event.preventDefault();
+                checkWord();
+            }
+        }
+
+// Función para verificar la palabra
+function checkWord() {
+    const word = grid.children[currentRow].textContent.toLowerCase();
+    intentos++;
+
+    if (word === currentWord) {
+        // ¡Felicidades!
+        message.textContent = "¡Felicidades! Has adivinado la palabra!";
+        document.getElementById("restart-button").style.display = "flex";
+        
+        // Mostrar la palabra en verde
+        for (let i = 0; i < currentWord.length; i++) {
+            const cell = grid.children[currentRow].children[i];
+            cell.textContent = currentWord[i];
+            cell.classList.add("correct");
+        }
+        
+        return;
+    }
+
+    if (currentRow === currentWord.length - 1) {
+        // Lo siento, no has adivinado la palabra.
+        message.textContent = "Lo siento, no has adivinado la palabra.";
+        document.getElementById("restart-button").style.display = "flex";
+        return;
+    }
+
+    // Resalta las letras correctas
+    for (let i = 0; i < currentWord.length; i++) {
+        const cell = grid.children[currentRow].children[i];
+        if (cell.textContent === currentWord[i]) {
+            cell.classList.add("correct");
+        } else if (currentWord.includes(cell.textContent)) {
+            cell.classList.add("present");
+        }
+    }
+
+    currentRow++;
+    currentColumn = 0;
+}
+
+
+        // Función para reiniciar el juego
+        function restartGame() {
+            // Limpiar el mensaje y las instrucciones
+            message.textContent = "";
+
+            // Limpiar el tablero
+            for (let i = 0; i < grid.children.length; i++) {
+                const row = grid.children[i];
+                for (let j = 0; j < row.children.length; j++) {
+                    const cell = row.children[j];
+                    cell.textContent = "";
+                    cell.classList.remove("correct");
+                    cell.classList.remove("present");
+                }
+            }
+
+            // Reiniciar variables
+            currentWord = words[Math.floor(Math.random() * words.length)];
+            currentRow = 0;
+            currentColumn = 0;
+            intentos = 0;
+
+            // Mostrar el botón
+            document.getElementById("restart-button").style.display = "block";
+        }
+    </script>
+</body>
+</html>
