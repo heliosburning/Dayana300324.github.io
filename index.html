@@ -56,6 +56,7 @@
             margin: 2px;
             background-color: #b48eff; /* Rosa */
             border-radius: 5px;
+            pointer-events: none; /* No capturar eventos de puntero */
         }
         .correct {
             background-color: #b3ffb3; /* Verde claro */
@@ -76,7 +77,7 @@
 <body>
     <div class="container">
         <div class="div1">Para Dani, Dayis es:</div>
-        <div class="div2" id="game-container">
+        <div class="div2" id="game-container" contenteditable="true">
             <div id="grid"></div>
         </div>
         <div class="div3" id="message"></div>
